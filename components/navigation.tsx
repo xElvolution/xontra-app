@@ -74,8 +74,20 @@ export function Navigation({ onWalletClick, onChainChange }: { onWalletClick: ()
     <>
       <nav className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-black/80 backdrop-blur-sm border-b border-slate-800/50 relative z-20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
-            <span className="text-black font-bold text-lg">L</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Xontra Logo" 
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback to gradient if logo fails to load
+                e.currentTarget.style.display = 'none';
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.innerHTML = '<div class="w-10 h-10 bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 rounded-xl flex items-center justify-center"><span class="text-black font-bold text-lg">X</span></div>';
+                }
+              }}
+            />
           </div>
           <span className="hidden md:block text-white text-xl font-bold bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 bg-clip-text text-transparent">
             Xontra

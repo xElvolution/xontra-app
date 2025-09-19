@@ -22,8 +22,20 @@ export function Footer() {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-lg">L</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                <img 
+                  src="/logo.png" 
+                  alt="Xontra Logo" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    // Fallback to gradient if logo fails to load
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-8 h-8 bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 rounded-lg flex items-center justify-center"><span class="text-black font-bold text-lg">X</span></div>';
+                    }
+                  }}
+                />
               </div>
               <span className="font-bold text-xl bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
                 Xontra
