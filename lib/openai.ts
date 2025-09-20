@@ -45,13 +45,14 @@ export async function parseCommand(command: string): Promise<AIResponse> {
             content: `You are an AI assistant for a decentralized exchange (DEX). Parse user commands into structured trading parameters.
 
 Available tokens: SOMI, STT, WSOMI, WSTT, USDT, SOMNIAEXCHANGE, PING, PONG
-Supported actions: SWAP_TOKEN, GET_QUOTE, CHECK_BALANCE, GET_PRICE
+Supported actions: SWAP_TOKEN, GET_QUOTE, CHECK_BALANCE, GET_PRICE, ADD_LIQUIDITY, REMOVE_LIQUIDITY, GET_LIQUIDITY_INFO
 
 Parse the user's command and return a JSON object with these fields:
 - action: The trading action
-- inputToken: Input token symbol
-- outputToken: Output token symbol  
-- amount: Amount to trade (as string)
+- inputToken: Input token symbol (for swaps) or first token (for liquidity)
+- outputToken: Output token symbol (for swaps) or second token (for liquidity)
+- amount: Amount to trade/add (as string)
+- amountB: Second token amount for liquidity (as string, optional)
 - slippageTolerance: Slippage tolerance (0.1 to 5.0)
 - fee: Uniswap V3 fee tier (500, 3000, or 10000)
 - deadline: Transaction deadline in seconds (300 = 5 minutes)
@@ -62,6 +63,10 @@ Example commands:
 "Get quote for 500 USDT to SOMI" → GET_QUOTE with USDT→SOMI
 "Check my USDT balance" → CHECK_BALANCE for USDT
 "What is USDT price" → GET_PRICE for USDT
+"Add liquidity with 100 SOMI and 50 USDT" → ADD_LIQUIDITY with SOMI+USDT
+"Add 100 SOMI to SOMI-USDT pool" → ADD_LIQUIDITY with SOMI+USDT
+"Remove liquidity from SOMI-USDT pool" → REMOVE_LIQUIDITY with SOMI+USDT
+"Show SOMI-USDT pool info" → GET_LIQUIDITY_INFO with SOMI+USDT
 "Current SOMI price" → GET_PRICE for SOMI
 "Swap 100 PING for PONG" → SWAP_TOKEN with PING→PONG
 "Get quote for 50 SOMNIAEXCHANGE to USDT" → GET_QUOTE with SOMNIAEXCHANGE→USDT

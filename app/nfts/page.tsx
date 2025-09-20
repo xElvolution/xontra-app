@@ -6,6 +6,7 @@ import { WalletDrawer } from "@/components/wallet-drawer"
 import { Footer } from "@/components/footer"
 import { SUPPORTED_CHAINS, type ChainConfig } from "@/lib/chains"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function NFTsOverviewPage() {
@@ -26,19 +27,19 @@ export default function NFTsOverviewPage() {
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
           <defs>
             <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#10b981" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#a855f7" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#9333ea" stopOpacity="0.4" />
             </linearGradient>
             <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.3" />
+              <stop offset="0%" stopColor="#9333ea" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.3" />
             </linearGradient>
             <linearGradient id="wave3" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#9333ea" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
             </linearGradient>
           </defs>
 
@@ -106,64 +107,64 @@ export default function NFTsOverviewPage() {
         <Navigation onWalletClick={handleWalletClick} onChainChange={handleChainChange} />
 
         {/* Main Hero Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
           <div className="max-w-6xl mx-auto text-center space-y-12">
             {/* Main Content */}
-            <div className="space-y-8">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-400 to-purple-400">
-                  Embrace the Celestial
-                </span>
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-400 to-purple-400">
-                  Realm, Ignite DeFi
+            <div className="space-y-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-center">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
+                  Your Gateway to the AI Frontier.
                 </span>
               </h1>
               
-              <p className="text-xl sm:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
-                Unlock the Power of the Zodiac: Participate in our Celestial Voyage to Fuel the DeFi Revolution!
+              <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed text-center">
+                The Xontra AI NFT unlocks exclusive access, advanced utilities, and the next chapter of decentralized intelligence.The Xontra AI NFT unlocks exclusive access, advanced utilities, and the next chapter of decentralized intelligence.
               </p>
             </div>
 
-            {/* Call to Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link href="/nfts/founders">
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-48 bg-gradient-to-r from-purple-500 to-purple-500 hover:from-purple-600 hover:to-purple-600 text-black px-8 py-6 text-xl font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
-                >
-                  Founders NFT
-                </Button>
-              </Link>
+            {/* NFT Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 max-w-4xl mx-auto">
+              <Card className="bg-slate-900/30 border-slate-800/50 backdrop-blur-sm p-6 text-center hover:bg-slate-800/40 transition-all duration-300">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-500">
+                    Founders NFT
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Exclusive access to premium features and early benefits in the Xontra ecosystem
+                  </p>
+                  <div className="pt-2">
+                    <Link href="/nfts/founders">
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
+                      >
+                        Mint Now
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
               
-              <Link href="/nfts/agents">
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-48 bg-gradient-to-r from-purple-500 to-purple-500 hover:from-purple-600 hover:to-purple-600 text-black px-8 py-6 text-xl font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
-                >
-                  AI Agents
-                </Button>
-              </Link>
-            </div>
-
-            {/* Additional Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20 max-w-4xl mx-auto">
-              <div className="space-y-6 text-center">
-                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-400">
-                  Founders NFT
-                </h3>
-                <p className="text-slate-400 text-xl leading-relaxed">
-                  Exclusive access to premium features and early benefits in the Xontra ecosystem
-                </p>
-              </div>
-              
-              <div className="space-y-6 text-center">
-                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-400">
-                  AI Agents
-                </h3>
-                <p className="text-slate-400 text-xl leading-relaxed">
-                  Advanced AI companions with unique capabilities and enhanced DeFi interactions
-                </p>
-              </div>
+              <Card className="bg-slate-900/30 border-slate-800/50 backdrop-blur-sm p-6 text-center hover:bg-slate-800/40 transition-all duration-300">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-500">
+                    AI Agents
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Advanced AI companions with unique capabilities and enhanced DeFi interactions
+                  </p>
+                  <div className="pt-2">
+                    <Link href="/nfts/agents">
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
+                      >
+                        Mint Now
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>

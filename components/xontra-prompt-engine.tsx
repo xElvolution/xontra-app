@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi'
 import { parseCommand, generateAIResponse, type ParsedCommand } from '@/lib/openai'
-import { getSwapQuote, executeSwap, type SwapQuote, type SwapTransaction } from '@/lib/somniaswap'
+import { getSwapQuote, executeSwap, getLiquidityQuote, addLiquidity, removeLiquidity, getPoolInfo, type SwapQuote, type SwapTransaction, type LiquidityQuote, type LiquidityTransaction, type PoolInfo } from '@/lib/somniaswap'
 import { SUPPORTED_CHAINS, type ChainConfig } from '@/lib/chains'
 
 export function XontraPromptEngine({ selectedChain, title }: { selectedChain: ChainConfig, title?: string }) {
   const [command, setCommand] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
   const [pendingSwap, setPendingSwap] = useState<ParsedCommand | null>(null)
+  const [pendingLiquidity, setPendingLiquidity] = useState<ParsedCommand | null>(null)
   const { isConnected, address } = useAccount()
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
@@ -22,6 +23,8 @@ export function XontraPromptEngine({ selectedChain, title }: { selectedChain: Ch
     content: string;
     timestamp: Date;
     quote?: SwapQuote | null;
+    liquidityQuote?: LiquidityQuote | null;
+    poolInfo?: PoolInfo | null;
   }>>([
     {
       id: Date.now(),
@@ -51,13 +54,15 @@ export function XontraPromptEngine({ selectedChain, title }: { selectedChain: Ch
     }
   }, [messages])
 
-  const addMessage = (type: 'user' | 'ai', content: string, quote?: SwapQuote | null) => {
+  const addMessage = (type: 'user' | 'ai', content: string, quote?: SwapQuote | null, liquidityQuote?: LiquidityQuote | null, poolInfo?: PoolInfo | null) => {
     const newMessage = {
       id: Date.now() + Math.random(), // Ensure unique ID
       type,
       content,
       timestamp: new Date(),
       quote, // Add quote data for interactive buttons
+      liquidityQuote, // Add liquidity quote data
+      poolInfo, // Add pool info data
     }
     setMessages(prev => [...prev, newMessage])
   }
@@ -93,9 +98,19 @@ export function XontraPromptEngine({ selectedChain, title }: { selectedChain: Ch
         return
       }
 
-      // Clear pending swap if user sends a new command
+      // Check if user is responding "yes" to a pending liquidity operation
+      if (pendingLiquidity && (userMessage.toLowerCase().includes('yes') || userMessage.toLowerCase().includes('execute') || userMessage.toLowerCase().includes('confirm'))) {
+        await handleExecuteLiquidity(pendingLiquidity)
+        setPendingLiquidity(null) // Clear pending liquidity after execution
+        return
+      }
+
+      // Clear pending operations if user sends a new command
       if (pendingSwap) {
         setPendingSwap(null)
+      }
+      if (pendingLiquidity) {
+        setPendingLiquidity(null)
       }
 
       // Parse command using OpenAI
@@ -112,6 +127,15 @@ export function XontraPromptEngine({ selectedChain, title }: { selectedChain: Ch
           case 'SWAP_TOKEN':
             // Always show quote first for swap commands
             await handleGetQuote(parsed)
+            break
+          case 'ADD_LIQUIDITY':
+            await handleAddLiquidity(parsed)
+            break
+          case 'REMOVE_LIQUIDITY':
+            await handleRemoveLiquidity(parsed)
+            break
+          case 'GET_LIQUIDITY_INFO':
+            await handleGetLiquidityInfo(parsed)
             break
           case 'CHECK_BALANCE':
             await handleCheckBalance(parsed)
@@ -305,6 +329,228 @@ For real-time balance updates, please use the wallet drawer or ask me to help yo
     addMessage('ai', aiResponse)
   }
 
+  const handleAddLiquidity = async (parsed: ParsedCommand) => {
+    // Check if we're on Somnia chains
+    if (selectedChain.id === 5031 || selectedChain.id === 50312) {
+      try {
+        const liquidityQuote = await getLiquidityQuote(
+          parsed.inputToken, 
+          parsed.outputToken, 
+          parsed.amount, 
+          parsed.amountB, 
+          selectedChain.id
+        )
+        
+        // Store the pending liquidity operation
+        setPendingLiquidity(parsed)
+        
+        addMessage('ai', `💧 **Liquidity Quote for ${parsed.inputToken}-${parsed.outputToken}**
+
+**Token A:** ${liquidityQuote.amountA} ${parsed.inputToken}
+**Token B:** ${liquidityQuote.amountB} ${parsed.outputToken}
+**LP Tokens:** ${liquidityQuote.liquidity}
+**Pool Address:** ${liquidityQuote.poolAddress}
+**Price Impact:** ${liquidityQuote.priceImpact}
+**Fee:** ${liquidityQuote.fee}
+**Gas Estimate:** ${liquidityQuote.gasEstimate}
+
+Would you like me to add this liquidity to the pool?`, null, liquidityQuote)
+      } catch (error) {
+        addMessage('ai', `❌ **Liquidity Quote Error**
+
+I encountered an error while getting the liquidity quote: ${error instanceof Error ? error.message : 'Unknown error'}
+
+Please check that the tokens are valid and the pool exists.`)
+      }
+      return
+    }
+    
+    // For other chains, show development message
+    addMessage('ai', `💧 **Add Liquidity Request**
+
+I understand you want to add liquidity with ${parsed.amount} ${parsed.inputToken} and ${parsed.amountB || 'optimal amount of'} ${parsed.outputToken} on ${selectedChain.name}.
+
+**Current Status:** Our native liquidity functionality is currently under development.
+
+**What you can do:**
+• Check real-time prices and token information
+• Monitor your token balances
+• Get updates on DEX deployment progress
+
+Once our native liquidity functionality is ready, I'll be able to provide quotes and execute liquidity operations directly through our interface.`)
+  }
+
+  const handleRemoveLiquidity = async (parsed: ParsedCommand) => {
+    // Check if we're on Somnia chains
+    if (selectedChain.id === 5031 || selectedChain.id === 50312) {
+      if (!isConnected || !address) {
+        addMessage('ai', `❌ **Wallet Not Connected**
+
+Please connect your wallet to remove liquidity on ${selectedChain.name}.`)
+        return
+      }
+
+      try {
+        const removeTx = await removeLiquidity(
+          parsed.inputToken,
+          parsed.outputToken,
+          parsed.amount, // This will be the LP token amount
+          selectedChain.id,
+          address
+        )
+
+        // Execute the remove liquidity transaction
+        try {
+          if (!walletClient) {
+            throw new Error('Wallet not connected')
+          }
+
+          const hash = await walletClient.sendTransaction({
+            to: removeTx.to as `0x${string}`,
+            data: removeTx.data as `0x${string}`,
+            value: BigInt(removeTx.value),
+            gas: BigInt(removeTx.gasLimit)
+          })
+
+          addMessage('ai', `✅ **Liquidity Removed!**
+
+**Transaction:** ${hash}
+**LP Tokens Removed:** ${parsed.amount}
+**Pool:** ${parsed.inputToken}-${parsed.outputToken}
+
+[View on Explorer](https://shannon-explorer.somnia.network/tx/${hash})`, null)
+        } catch (error) {
+          addMessage('ai', `❌ **Remove Liquidity Failed**
+
+${error instanceof Error ? error.message : 'Transaction failed'}
+
+Try again or check your LP token balance.`, null)
+        }
+      } catch (error) {
+        addMessage('ai', `❌ **Remove Liquidity Error**
+
+I encountered an error while preparing the transaction: ${error instanceof Error ? error.message : 'Unknown error'}
+
+Please check your LP token balance and try again.`)
+      }
+      return
+    }
+    
+    // For other chains, show development message
+    addMessage('ai', `💧 **Remove Liquidity Request**
+
+I understand you want to remove liquidity from ${parsed.inputToken}-${parsed.outputToken} pool on ${selectedChain.name}.
+
+**Current Status:** Our native liquidity functionality is currently under development.
+
+**What you can do:**
+• Check real-time prices and token information
+• Monitor your token balances
+• Get updates on DEX deployment progress
+
+Once our native liquidity functionality is ready, I'll be able to handle the entire liquidity removal process directly through our interface.`)
+  }
+
+  const handleGetLiquidityInfo = async (parsed: ParsedCommand) => {
+    // Check if we're on Somnia chains
+    if (selectedChain.id === 5031 || selectedChain.id === 50312) {
+      try {
+        const poolInfo = await getPoolInfo(
+          parsed.inputToken,
+          parsed.outputToken,
+          selectedChain.id
+        )
+        
+        addMessage('ai', `📊 **Pool Information: ${parsed.inputToken}-${parsed.outputToken}**
+
+**Token A Reserves:** ${poolInfo.reserveA} ${parsed.inputToken}
+**Token B Reserves:** ${poolInfo.reserveB} ${parsed.outputToken}
+**Total LP Supply:** ${poolInfo.totalSupply}
+**Pool Address:** ${poolInfo.poolAddress}
+**Fee:** ${poolInfo.fee}
+
+**Current Price:** 1 ${parsed.inputToken} = ${(parseFloat(poolInfo.reserveB) / parseFloat(poolInfo.reserveA)).toFixed(6)} ${parsed.outputToken}`, null, null, poolInfo)
+      } catch (error) {
+        addMessage('ai', `❌ **Pool Info Error**
+
+I encountered an error while getting pool information: ${error instanceof Error ? error.message : 'Unknown error'}
+
+The pool might not exist yet. You can create it by adding the first liquidity.`)
+      }
+      return
+    }
+    
+    // For other chains, show development message
+    addMessage('ai', `📊 **Pool Information Request**
+
+I understand you want to see information about the ${parsed.inputToken}-${parsed.outputToken} pool on ${selectedChain.name}.
+
+**Current Status:** Our native pool information functionality is currently under development.
+
+**What you can do:**
+• Check real-time prices and token information
+• Monitor your token balances
+• Get updates on DEX deployment progress
+
+Once our native pool information functionality is ready, I'll be able to show detailed pool analytics directly through our interface.`)
+  }
+
+  const handleExecuteLiquidity = async (parsed: ParsedCommand) => {
+    if (!isConnected || !address) {
+      addMessage('ai', `❌ **Wallet Not Connected**
+
+Please connect your wallet to execute liquidity operations on ${selectedChain.name}.`)
+      return
+    }
+
+    try {
+      const liquidityTx = await addLiquidity(
+        parsed.inputToken,
+        parsed.outputToken,
+        parsed.amount,
+        parsed.amountB || '0', // Use provided amountB or 0
+        parsed.slippageTolerance || 0.5,
+        selectedChain.id,
+        address
+      )
+
+      // Execute the add liquidity transaction
+      try {
+        if (!walletClient) {
+          throw new Error('Wallet not connected')
+        }
+
+        const hash = await walletClient.sendTransaction({
+          to: liquidityTx.to as `0x${string}`,
+          data: liquidityTx.data as `0x${string}`,
+          value: BigInt(liquidityTx.value),
+          gas: BigInt(liquidityTx.gasLimit)
+        })
+
+        addMessage('ai', `✅ **Liquidity Added!**
+
+**Transaction:** ${hash}
+**Token A:** ${parsed.amount} ${parsed.inputToken}
+**Token B:** ${parsed.amountB || 'optimal amount'} ${parsed.outputToken}
+**LP Tokens:** ${liquidityTx.liquidityDetails?.liquidity}
+
+[View on Explorer](https://shannon-explorer.somnia.network/tx/${hash})`, null)
+      } catch (error) {
+        addMessage('ai', `❌ **Add Liquidity Failed**
+
+${error instanceof Error ? error.message : 'Transaction failed'}
+
+Try again or check your token balances.`, null)
+      }
+    } catch (error) {
+      addMessage('ai', `❌ **Add Liquidity Error**
+
+I encountered an error while preparing the transaction: ${error instanceof Error ? error.message : 'Unknown error'}
+
+Please check your token balances and try again.`)
+    }
+  }
+
 
   // Copy and edit functionality
   const copyMessage = async (text: string, messageId: number) => {
@@ -394,11 +640,13 @@ For real-time balance updates, please use the wallet drawer or ask me to help yo
     return [
       `Swap 1 ${nativeToken} for USDT`,
       `Get quote for 500 USDT to ${nativeToken}`,
+      `Add liquidity with 100 ${nativeToken} and 50 USDT`,
+      `Show ${nativeToken}-USDT pool info`,
       `Check my ${nativeToken} balance`,
       "What is Bitcoin price",
       "Show DeFi TVL",
       "Top yield farming opportunities",
-      "How to swap",
+      "How to add liquidity",
       "Explain MEV protection"
     ]
   }
@@ -515,6 +763,35 @@ For real-time balance updates, please use the wallet drawer or ask me to help yo
                             </button>
                             <button
                               onClick={() => addMessage('ai', 'Swap cancelled.')}
+                              className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                        {message.liquidityQuote && message.type === 'ai' && message.content.includes('Would you like me to add this liquidity to the pool?') && (
+                          <div className="flex gap-2 mt-3">
+                            <button
+                              onClick={() => {
+                                handleExecuteLiquidity({
+                                  action: 'ADD_LIQUIDITY',
+                                  message: 'Execute add liquidity',
+                                  inputToken: message.liquidityQuote!.tokenA.symbol,
+                                  outputToken: message.liquidityQuote!.tokenB.symbol,
+                                  amount: message.liquidityQuote!.amountA,
+                                  amountB: message.liquidityQuote!.amountB,
+                                  slippageTolerance: 0.5,
+                                  deadline: 300,
+                                  fee: 3000
+                                })
+                                setPendingLiquidity(null) // Clear pending liquidity
+                              }}
+                              className="px-4 py-2 bg-green-700 hover:bg-green-800 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              Yes, Add Liquidity
+                            </button>
+                            <button
+                              onClick={() => addMessage('ai', 'Liquidity addition cancelled.')}
                               className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors"
                             >
                               Cancel
