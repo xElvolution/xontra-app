@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi'
-import { parseCommand, generateAIResponse, type ParsedCommand } from '@/lib/openai'
+import { parseCommand, generateAIResponse, type ParsedCommand } from '@/lib/openai-client'
 import { getSwapQuote, executeSwap, getLiquidityQuote, addLiquidity, removeLiquidity, getPoolInfo, type SwapQuote, type SwapTransaction, type LiquidityQuote, type LiquidityTransaction, type PoolInfo } from '@/lib/somniaswap'
 import { SUPPORTED_CHAINS, type ChainConfig } from '@/lib/chains'
 

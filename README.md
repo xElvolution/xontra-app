@@ -99,7 +99,7 @@ Create a `.env.local` file with the following variables:
 
 ```env
 # OpenAI API Key for AI-powered trading
-NEXT_PUBLIC_OPENAI_API_KEY=your_openai_key_here
+OPENAI_API_KEY==your_openai_key_here
 
 
 # Somnia Exchange addresses (Somnia Mainnet)
