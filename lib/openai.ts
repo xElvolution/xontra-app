@@ -38,7 +38,7 @@ export async function parseCommand(command: string): Promise<AIResponse> {
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo', // Using gpt-3.5-turbo instead of gpt-4 for better compatibility
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
