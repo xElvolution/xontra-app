@@ -435,12 +435,21 @@ export function getToken(symbol: string, chainId: number): Token {
     throw new Error(`Chain ${chainId} not supported`)
   }
 
-  const token = chainTokens[symbol.toLowerCase()]
+  let tokenSymbol = symbol.toLowerCase()
+  
+  // Convert native tokens to wrapped versions for pool operations
+  if (tokenSymbol === 'stt' && chainId === 50312) {
+    tokenSymbol = 'wstt' 
+  } else if (tokenSymbol === 'somi' && chainId === 5031) {
+    tokenSymbol = 'wsomi' 
+  }
+
+  const token = chainTokens[tokenSymbol]
   if (!token) {
     throw new Error(`Token ${symbol} not found on chain ${chainId}`)
   }
 
-    return {
+  return {
     ...token,
     chainId
   }

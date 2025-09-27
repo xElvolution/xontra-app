@@ -149,5 +149,3 @@ export default function FoundersNFTsPage() {
     </div>
   )
 }
-
-

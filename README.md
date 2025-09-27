@@ -181,7 +181,7 @@ xontra-dex/
 │   ├── page.tsx           # Home page
 │   ├── swap/              # Swap page
 │   │   └── page.tsx
-│   └── nfts/              # NFT pages
+│   └── nft/               # NFT pages
 │       ├── page.tsx       # Main NFT page
 │       ├── agents/        # Agent NFTs
 │       │   └── page.tsx

@@ -6,10 +6,8 @@ import { WalletDrawer } from "@/components/wallet-drawer"
 import { Footer } from "@/components/footer"
 import { SUPPORTED_CHAINS, type ChainConfig } from "@/lib/chains"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import Link from "next/link"
 
-export default function NFTsOverviewPage() {
+export default function AgentsNFTsPage() {
   const [selectedChain, setSelectedChain] = useState<ChainConfig>(SUPPORTED_CHAINS[0])
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false)
 
@@ -106,65 +104,36 @@ export default function NFTsOverviewPage() {
       <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh] mobile-safe-area">
         <Navigation onWalletClick={handleWalletClick} onChainChange={handleChainChange} />
 
-        {/* Main Hero Content */}
+        {/* Main Coming Soon Content */}
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
-          <div className="max-w-6xl mx-auto text-center space-y-12">
+          <div className="max-w-4xl mx-auto text-center space-y-12">
             {/* Main Content */}
             <div className="space-y-6">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-center">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
-                  Your Gateway to the AI Frontier.
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
+                  AI Agents
+                </span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
+                  Coming Soon
                 </span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed text-center">
-                The Xontra AI NFT unlocks exclusive access, advanced utilities, and the next chapter of decentralized intelligence.The Xontra AI NFT unlocks exclusive access, advanced utilities, and the next chapter of decentralized intelligence.
+              <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                Discover the next generation of AI-powered DeFi companions. Our AI Agents will revolutionize 
+                how you interact with decentralized finance, providing intelligent insights, automated strategies, 
+                and personalized assistance in your DeFi journey.
               </p>
             </div>
 
-            {/* NFT Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 max-w-4xl mx-auto">
-              <Card className="bg-slate-900/30 border-slate-800/50 backdrop-blur-sm p-6 text-center hover:bg-slate-800/40 transition-all duration-300">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-500">
-                    Founders NFT
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    Exclusive access to premium features and early benefits in the Xontra ecosystem
-                  </p>
-                  <div className="pt-2">
-                    <Link href="/nfts/founders">
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
-                      >
-                        Mint Now
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card className="bg-slate-900/30 border-slate-800/50 backdrop-blur-sm p-6 text-center hover:bg-slate-800/40 transition-all duration-300">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-500">
-                    AI Agents
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    Advanced AI companions with unique capabilities and enhanced DeFi interactions
-                  </p>
-                  <div className="pt-2">
-                    <Link href="/nfts/agents">
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
-                      >
-                        Mint Now
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </Card>
+            {/* Coming Soon Button */}
+            <div className="flex justify-center">
+              <Button 
+                size="lg" 
+                className="bg-slate-800/50 border border-slate-700/50 text-slate-400 px-6 py-3 text-base font-semibold rounded-lg cursor-not-allowed"
+                disabled
+              >
+                Coming Soon
+              </Button>
             </div>
           </div>
         </div>
@@ -180,5 +149,3 @@ export default function NFTsOverviewPage() {
     </div>
   )
 }
-
-
