@@ -1,23 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { WalletDrawer } from "@/components/wallet-drawer"
+import { XontraPromptEngine } from "@/components/xontra-prompt-engine"
 import { Footer } from "@/components/footer"
+import { useState } from "react"
 import { SUPPORTED_CHAINS, type ChainConfig } from "@/lib/chains"
-import { Button } from "@/components/ui/button"
 
-export default function AgentsNFTsPage() {
-  const [selectedChain, setSelectedChain] = useState<ChainConfig>(SUPPORTED_CHAINS[0])
+export default function DeployPage() {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false)
-
-  const handleChainChange = (chain: ChainConfig) => {
-    setSelectedChain(chain)
-  }
-
-  const handleWalletClick = () => {
-    setIsWalletDrawerOpen(true)
-  }
+  const [selectedChain, setSelectedChain] = useState<ChainConfig>(SUPPORTED_CHAINS[0])
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-black text-white relative overflow-hidden flex flex-col">
@@ -89,51 +81,29 @@ export default function AgentsNFTsPage() {
 
         {/* Animated gradient overlays */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent animate-pulse"></div>
+          <div className="absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/30 to-transparent animate-pulse"></div>
           <div
-            className="absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent animate-pulse"
+            className="absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/30 to-transparent animate-pulse"
             style={{ animationDelay: "2s" }}
           ></div>
           <div
-            className="absolute top-3/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent animate-pulse"
+            className="absolute top-3/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/30 to-transparent animate-pulse"
             style={{ animationDelay: "4s" }}
           ></div>
         </div>
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh] mobile-safe-area">
-        <Navigation onWalletClick={handleWalletClick} onChainChange={handleChainChange} />
+        <Navigation 
+          onWalletClick={() => setIsWalletDrawerOpen(true)} 
+          onChainChange={setSelectedChain}
+        />
 
-        {/* Main Coming Soon Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 mt-16">
-          <div className="max-w-4xl mx-auto text-center space-y-12">
-            {/* Main Content */}
-            <div className="space-y-6">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
-                  AI Agents
-                </span>
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500">
-                  Coming Soon
-                </span>
-              </h1>
-              
-              <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Discover the next generation of AI-powered DeFi companions. Our AI Agents will revolutionize 
-                how you interact with decentralized finance, providing intelligent insights, automated strategies, 
-                and personalized assistance in your DeFi journey.
-              </p>
-            </div>
-
-            {/* Coming Soon Button */}
-            <div className="flex justify-center">
-              <Button 
-                size="lg" 
-                className="bg-slate-800/50 border border-slate-700/50 text-slate-400 px-6 py-3 text-base font-semibold rounded-lg cursor-not-allowed"
-                disabled
-              >
-                Coming Soon
-              </Button>
+        <div className="flex-1 flex gap-6 p-3 sm:p-6 mt-16">
+          {/* Main Content - Now Centered */}
+          <div className="flex-1 max-w-4xl mx-auto space-y-6 flex flex-col w-full">
+            <div className="flex-1 min-h-[400px] sm:min-h-[500px]">
+              <XontraPromptEngine selectedChain={selectedChain} title="XONTRA CONTRACT ENGINE" />
             </div>
           </div>
         </div>
@@ -141,9 +111,9 @@ export default function AgentsNFTsPage() {
         <Footer />
       </div>
 
-      <WalletDrawer
-        isOpen={isWalletDrawerOpen}
-        onClose={() => setIsWalletDrawerOpen(false)}
+      <WalletDrawer 
+        isOpen={isWalletDrawerOpen} 
+        onClose={() => setIsWalletDrawerOpen(false)} 
         selectedChain={selectedChain}
       />
     </div>

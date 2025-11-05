@@ -44,7 +44,7 @@ export async function parseCommand(command: string): Promise<AIResponse> {
             role: 'system',
             content: `You are an AI assistant for a decentralized exchange (DEX). Parse user commands into structured trading parameters.
 
-Available tokens: SOMI (native), STT (native), WSOMI (wrapped SOMI), WSTT (wrapped STT), USDT, SOMNIAEXCHANGE, PING, PONG
+Available tokens: SOMI (native), STT (native), WSOMI (wrapped SOMI), WSTT (wrapped STT), USDT, XON
 
 IMPORTANT: For liquidity pools, native tokens (SOMI, STT) are automatically converted to their wrapped versions (WSOMI, WSTT) since native tokens cannot have pools.
 Supported actions: SWAP_TOKEN, GET_QUOTE, CHECK_BALANCE, GET_PRICE, ADD_LIQUIDITY, REMOVE_LIQUIDITY, GET_LIQUIDITY_INFO
@@ -70,8 +70,8 @@ Example commands:
 "Remove liquidity from SOMI-USDT pool" → REMOVE_LIQUIDITY with SOMI+USDT
 "Show SOMI-USDT pool info" → GET_LIQUIDITY_INFO with SOMI+USDT
 "Current SOMI price" → GET_PRICE for SOMI
-"Swap 100 PING for PONG" → SWAP_TOKEN with PING→PONG
-"Get quote for 50 SOMNIAEXCHANGE to USDT" → GET_QUOTE with SOMNIAEXCHANGE→USDT
+"Swap 100 XON for USDT" → SWAP_TOKEN with XON→USDT
+"Get quote for 50 XON to WSTT" → GET_QUOTE with XON→WSTT
 
 Always return valid JSON.`
           },

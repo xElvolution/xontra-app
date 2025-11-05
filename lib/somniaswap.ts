@@ -8,8 +8,8 @@ const SOMNIA_DEX_ADDRESSES: Record<number, { router: string; factory: string }> 
     factory: '0x6C4853C97b981Aa848C2b56F160a73a46b5DCCD4' // Factory
   },
   50312: { // Somnia Testnet
-    router: '0xb98c15a0dC1e271132e341250703c7e94c059e8D', // Somnia Exchange Router V02
-    factory: '0x31015A978c5815EdE29D0F969a17e116BC1866B1' // Somnia Exchange Factory
+    router: '0xa73E8d6Cdb44aa8002188E6737848D479e7EfE9C', // Xontra Router
+    factory: '0x797a411839e18B13f1B7c509f84e4D5cc0cFCF42' // Xontra Factory
   }
 }
 
@@ -34,24 +34,6 @@ const CHAIN_TOKENS: Record<number, Record<string, { address: string; symbol: str
       decimals: 6,
       name: 'USD Coin'
     },
-    somniaexchange: {
-      address: '0xf2f773753cebefaf9b68b841d80c083b18c69311', // SomniaExchange Token
-      symbol: 'SOMNIAEXCHANGE',
-      decimals: 18,
-      name: 'SomniaExchange Token'
-    },
-    ping: {
-      address: '0x33e7fab0a8a5da1a923180989bd617c9c2d1c493', // Ping Token
-      symbol: 'PING',
-      decimals: 18,
-      name: 'Ping Token'
-    },
-    pong: {
-      address: '0x9beaa0016c22b646ac311ab171270b0ecf23098f', // Pong Token
-      symbol: 'PONG',
-      decimals: 18,
-      name: 'Pong Token'
-    }
   },
   50312: { // Somnia Testnet
     stt: {
@@ -61,34 +43,22 @@ const CHAIN_TOKENS: Record<number, Record<string, { address: string; symbol: str
       name: 'Somnia Test Token'
     },
     wstt: {
-      address: '0xF22eF0085f6511f70b01a68F360dCc56261F768a', // WSTT contract address
+      address: '0x25395F913c3e330683C7f6540E5B0bB60790999D', // WSTT contract address
       symbol: 'WSTT',
       decimals: 18,
       name: 'Wrapped Somnia Test Token'
     },
     usdt: {
-      address: '0xda4fde38be7a2b959bf46e032ecfa21e64019b76', // USDT on Somnia Testnet
+      address: '0xd7BFAfA0573236528e86A37D529938422c2FC631', // USDT on Somnia Testnet
       symbol: 'USDT',
-      decimals: 18,
+      decimals: 9,
       name: 'Tether USD'
     },
-    somniaexchange: {
-      address: '0xf2f773753cebefaf9b68b841d80c083b18c69311', // SomniaExchange Token
-      symbol: 'SOMNIAEXCHANGE',
-      decimals: 18,
-      name: 'SomniaExchange Token'
-    },
-    ping: {
-      address: '0x33e7fab0a8a5da1a923180989bd617c9c2d1c493', // Ping Token
-      symbol: 'PING',
-      decimals: 18,
-      name: 'Ping Token'
-    },
-    pong: {
-      address: '0x9beaa0016c22b646ac311ab171270b0ecf23098f', // Pong Token
-      symbol: 'PONG',
-      decimals: 18,
-      name: 'Pong Token'
+    xon: {
+      address: '0x2be4D53C9DCE1c95c625bf7b5f058F385F56EC09', // XON token
+      symbol: 'XON',
+      decimals: 9,
+      name: 'Xontra AI'
     }
   }
 }
@@ -256,13 +226,13 @@ export async function getSwapQuote(
       // STT → USDT: Use WSTT → USDT path (STT gets wrapped to WSTT first)
       const wrappedTokenAddress = chainId === 5031 ? 
         '0x0000000000000000000000000000000000000000' : // WSOMI address needed
-        '0xF22eF0085f6511f70b01a68F360dCc56261F768a'  // WSTT address
+        '0x25395F913c3e330683C7f6540E5B0bB60790999D'  // WSTT address
       path = [wrappedTokenAddress, toTokenInfo.address]
     } else if (fromIsERC20 && toIsNative) {
       // USDT → STT: Use USDT → WSTT path (WSTT gets unwrapped to STT)
       const wrappedTokenAddress = chainId === 5031 ? 
         '0x0000000000000000000000000000000000000000' : // WSOMI address needed
-        '0xF22eF0085f6511f70b01a68F360dCc56261F768a'  // WSTT address
+        '0x25395F913c3e330683C7f6540E5B0bB60790999D'  // WSTT address
       path = [fromTokenInfo.address, wrappedTokenAddress]
     } else {
       // Direct token to token swap (WSTT ↔ USDT)
@@ -349,7 +319,7 @@ export async function executeSwap(
       // STT → USDT: Router handles STT → WSTT → USDT automatically
       const wrappedTokenAddress = chainId === 5031 ? 
         '0x0000000000000000000000000000000000000000' : // WSOMI address needed
-        '0xF22eF0085f6511f70b01a68F360dCc56261F768a'  // WSTT address
+        '0x25395F913c3e330683C7f6540E5B0bB60790999D'  // WSTT address
       
       swapData = createSwapExactETHForTokensSupportingFeeOnTransferTokensData(
         [wrappedTokenAddress, toTokenInfo.address], // Path: WSTT → USDT
@@ -362,7 +332,7 @@ export async function executeSwap(
       // USDT → STT: Router handles USDT → WSTT → STT automatically
       const wrappedTokenAddress = chainId === 5031 ? 
         '0x0000000000000000000000000000000000000000' : // WSOMI address needed
-        '0xF22eF0085f6511f70b01a68F360dCc56261F768a'  // WSTT address
+        '0x25395F913c3e330683C7f6540E5B0bB60790999D'  // WSTT address
       
       swapData = createSwapExactTokensForETHSupportingFeeOnTransferTokensData(
         [fromTokenInfo.address, wrappedTokenAddress], // Path: USDT → WSTT
@@ -707,8 +677,13 @@ export async function getLiquidityQuote(
     // Calculate liquidity to mint
     let liquidity: ethers.BigNumber
     if (totalSupply.eq(0)) {
-      // First liquidity provision
-      liquidity = ethers.BigNumber.from(amountAParsed).mul(amountBParsed).sqrt()
+      // First liquidity provision: sqrt(amountA * amountB)
+      const product = amountAParsed.mul(amountBParsed)
+      // Use a simple approximation: sqrt(x) ≈ x / sqrt(x) for large numbers
+      // For exact calculation, we can use Math.sqrt on the number representation
+      const productNum = parseFloat(ethers.utils.formatEther(product))
+      const sqrtNum = Math.sqrt(productNum)
+      liquidity = ethers.utils.parseEther(sqrtNum.toString())
     } else {
       // Calculate based on existing reserves
       const liquidityA = amountAParsed.mul(totalSupply).div(reserveA)

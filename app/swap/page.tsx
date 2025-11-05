@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Navigation } from "@/components/navigation"
-import { NetworkMatrix } from "@/components/network-matrix"
 import { XontraPromptEngine } from "@/components/xontra-prompt-engine"
 import { WalletDrawer } from "@/components/wallet-drawer"
 import { Footer } from "@/components/footer"
@@ -108,14 +107,11 @@ export default function SwapPage() {
           onChainChange={setSelectedChain}
         />
 
-        <div className="flex-1 flex gap-6 p-3 sm:p-6">
+        <div className="flex-1 flex gap-6 p-3 sm:p-6 mt-16">
           {/* Main Content - Now Centered */}
           <div className="flex-1 max-w-4xl mx-auto space-y-6 flex flex-col w-full">
             <div className="flex-1 min-h-[400px] sm:min-h-[500px]">
               <XontraPromptEngine selectedChain={selectedChain} title="XONTRA SWAP ENGINE" />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-              <NetworkMatrix selectedChain={selectedChain} />
             </div>
           </div>
         </div>

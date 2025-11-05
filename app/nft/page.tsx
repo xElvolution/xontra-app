@@ -107,7 +107,7 @@ export default function NFTsOverviewPage() {
         <Navigation onWalletClick={handleWalletClick} onChainChange={handleChainChange} />
 
         {/* Main Hero Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 mt-16">
           <div className="max-w-6xl mx-auto text-center space-y-12">
             {/* Main Content */}
             <div className="space-y-6">

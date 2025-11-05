@@ -105,7 +105,7 @@ export default function FoundersNFTsPage() {
         <Navigation onWalletClick={handleWalletClick} onChainChange={handleChainChange} />
 
         {/* Main Coming Soon Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 mt-16">
           <div className="max-w-4xl mx-auto text-center space-y-12">
             {/* Main Content */}
             <div className="space-y-6">

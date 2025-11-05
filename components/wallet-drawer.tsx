@@ -39,6 +39,7 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
   const [ethPrice, setEthPrice] = useState(2800)
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [showAllTransactions, setShowAllTransactions] = useState(false)
 
@@ -64,44 +65,76 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
 
   const userAvatarSrc = getUserAvatarSrc(address)
 
-  const fetchWalletData = useCallback(async () => {
+  // Fetch balances first (fast)
+  const fetchBalances = useCallback(async () => {
     if (!address) return
     
-    setIsRefreshing(true)
     try {
-      // Fetch data for Somnia chains only
-      const [tokenData, txData, priceData] = await Promise.all([
+      // Fetch balances and price only (fast)
+      const [tokenData, priceData] = await Promise.all([
         getSomniaTokenBalances(address, selectedChain.id),
-        getRecentTransactions(address, 1, 100, selectedChain.id),
         getNativeTokenPrice(selectedChain.id)
       ])
       
+      console.log(`Fetched ${tokenData.length} tokens for chain ${selectedChain.id}:`, tokenData.map(t => `${t.tokenSymbol} (${t.balance})`))
       setTokens(tokenData)
-      setTransactions(txData)
       setEthPrice(priceData)
       
       // Calculate total portfolio value from Somnia tokens
       const totalValue = tokenData.reduce((sum, token) => sum + (token.usdValue || 0), 0)
       setTotalPortfolioValue(totalValue)
     } catch (error) {
-      console.error('Error fetching Somnia wallet data:', error)
+      console.error('Error fetching Somnia wallet balances:', error)
+    }
+  }, [address, selectedChain.id])
+
+  // Fetch transactions separately (can be slow)
+  const fetchTransactions = useCallback(async () => {
+    if (!address) return
+    
+    setIsLoadingTransactions(true)
+    try {
+      const txData = await getRecentTransactions(address, 1, 100, selectedChain.id)
+      setTransactions(txData)
+    } catch (error) {
+      console.error('Error fetching Somnia wallet transactions:', error)
+    } finally {
+      setIsLoadingTransactions(false)
+    }
+  }, [address, selectedChain.id])
+
+  // Fetch all data (for refresh)
+  const fetchWalletData = useCallback(async () => {
+    if (!address) return
+    
+    setIsRefreshing(true)
+    try {
+      await fetchBalances()
+      await fetchTransactions()
+    } catch (error) {
+      console.error('Error refreshing wallet data:', error)
     } finally {
       setIsRefreshing(false)
     }
-  }, [address, selectedChain.id])
+  }, [address, fetchBalances, fetchTransactions])
 
   // Fetch real data when wallet is connected
   useEffect(() => {
     if (isConnected && address) {
+      // Fetch balances first (fast)
       setIsLoading(true)
-      fetchWalletData().finally(() => setIsLoading(false))
+      fetchBalances().finally(() => setIsLoading(false))
+      
+      // Then fetch transactions in the background (can be slow)
+      fetchTransactions()
+      
       // Auto-refresh every 30 seconds
       const interval = setInterval(() => {
         fetchWalletData()
       }, 30000)
       return () => clearInterval(interval)
     }
-  }, [isConnected, address, fetchWalletData])
+  }, [isConnected, address, fetchBalances, fetchTransactions, fetchWalletData])
 
   const copyAddress = async () => {
     if (typeof window === "undefined") return
@@ -213,7 +246,7 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
                       <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                     <h3 className="text-white font-medium mb-2 text-sm">Loading wallet data...</h3>
-                     <p className="text-slate-400 text-xs">Fetching tokens from all chains and recent activity</p>
+                     <p className="text-slate-400 text-xs">Fetching tokens from Somnia chain and recent activity</p>
                   </div>
                 )}
                 
@@ -381,31 +414,37 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
                           </div>
                           
                           {/* Multi-Chain Tokens */}
-                          {tokens.map((token) => (
+                          {tokens.map((token) => {
+                            // Get token logo URL
+                            const getTokenLogo = (symbol: string, chainId: number): string => {
+                              if (symbol === 'STT' || symbol === 'WSTT' || symbol === 'SOMI') {
+                                return `/images/chains/${chainId}.png`
+                              }
+                              if (symbol === 'USDT') {
+                                return '/images/usdt.png'
+                              }
+                              if (symbol === 'XON') {
+                                return '/logo.png'
+                              }
+                              if (symbol === 'ETH') {
+                                return '/images/chains/1.png'
+                              }
+                              return ''
+                            }
+                            
+                            const logoUrl = getTokenLogo(token.tokenSymbol, token.chainId)
+                            
+                            return (
                             <div key={`${token.contractAddress}-${token.chainId}`} className="group bg-gradient-to-r from-slate-800/40 to-slate-700/40 rounded-xl p-4 border border-slate-600/30 hover:border-purple-600/50 hover:from-slate-800/60 hover:to-slate-700/60 transition-all duration-300 backdrop-blur-sm">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                   <div className="relative">
-                                    {/* Override logo for ETH tokens to always show Ethereum logo */}
-                                    {token.tokenSymbol === 'ETH' ? (
+                                    {logoUrl ? (
                                       <img 
-                                        src="/images/chains/1.png" 
-                                        alt="Ethereum"
-                                        className="w-12 h-12 rounded-full ring-2 ring-slate-600/50 group-hover:ring-purple-600/50 transition-all duration-300"
-                                        onError={(e) => {
-                                          const target = e.target as HTMLImageElement
-                                          target.style.display = 'none'
-                                          const fallback = target.nextElementSibling as HTMLElement
-                                          if (fallback) fallback.style.display = 'flex'
-                                        }}
-                                      />
-                                    ) : (token as any).logoUrl ? (
-                                      <img 
-                                        src={(token as any).logoUrl} 
+                                        src={logoUrl}
                                         alt={token.tokenSymbol}
                                         className="w-12 h-12 rounded-full ring-2 ring-slate-600/50 group-hover:ring-purple-600/50 transition-all duration-300"
                                         onError={(e) => {
-                                          // Fallback to gradient if logo fails to load
                                           const target = e.target as HTMLImageElement
                                           target.style.display = 'none'
                                           const fallback = target.nextElementSibling as HTMLElement
@@ -415,7 +454,7 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
                                     ) : null}
                                     <div 
                                       className="w-12 h-12 bg-gradient-to-br from-purple-600 via-pink-500 to-rose-500 rounded-full flex items-center justify-center ring-2 ring-slate-600/50 group-hover:ring-purple-600/50 transition-all duration-300 shadow-lg"
-                                      style={{ display: token.tokenSymbol === 'ETH' || (token as any).logoUrl ? 'none' : 'flex' }}
+                                      style={{ display: logoUrl ? 'none' : 'flex' }}
                                     >
                                       <span className="text-white text-lg font-bold">{token.tokenSymbol.charAt(0)}</span>
                                     </div>
@@ -469,7 +508,8 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
                                 </div>
                               </div>
                             </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       ) : (
                         <div className="text-center py-12">
@@ -526,7 +566,7 @@ export function WalletDrawer({ isOpen, onClose, selectedChain }: WalletDrawerPro
                         </div>
                       </div>
 
-                      {isLoading ? (
+                      {isLoadingTransactions ? (
                         <div className="text-center py-12">
                           <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                             <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>

@@ -1,0 +1,21 @@
+{
+  "somniaMainnet": {
+    "chainId": 5031,
+    "factory": "",
+    "router": "",
+    "initCodePairHash": "",
+    "tokens": {}
+  },
+  "somniaTestnet": {
+    "chainId": 50312,
+    "factory": "0x797a411839e18B13f1B7c509f84e4D5cc0cFCF42",
+    "router": "0xa73E8d6Cdb44aa8002188E6737848D479e7EfE9C",
+    "initCodePairHash": "",
+    "tokens": {
+      "WSTT": "0x25395F913c3e330683C7f6540E5B0bB60790999D",
+      "USDT": "0xd7BFAfA0573236528e86A37D529938422c2FC631",
+      "XON": "0x2be4D53C9DCE1c95c625bf7b5f058F385F56EC09"
+    }
+  }
+}
+

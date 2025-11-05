@@ -524,70 +524,81 @@ export async function getSomniaTokenBalances(address: string, chainId: number): 
     const nativeBalanceData = await nativeBalanceResponse.json()
     const nativeBalance = nativeBalanceData.result
     
-    if (nativeBalance) {
-      const balanceInEther = parseInt(nativeBalance, 16) / Math.pow(10, 18)
-      const tokenPrice = await getNativeTokenPrice(chainId)
-      const usdValue = balanceInEther * tokenPrice
-      
-      balances.push({
-        contractAddress: '0x0000000000000000000000000000000000000000',
-        tokenSymbol: chain.nativeCurrency,
-        tokenName: chain.nativeCurrency === 'STT' ? 'Somnia Testnet Token' : 'Somnia',
-        tokenDecimal: '18',
-        balance: balanceInEther.toString(),
-        usdValue: usdValue,
-        chainId: chainId,
-        chainName: chain.name,
-        logoUrl: undefined
-      })
-    }
+    // Always show native token, even if balance is 0
+    const balanceInEther = nativeBalance ? parseInt(nativeBalance, 16) / Math.pow(10, 18) : 0
+    const tokenPrice = await getNativeTokenPrice(chainId)
+    const usdValue = balanceInEther * tokenPrice
+    
+    balances.push({
+      contractAddress: '0x0000000000000000000000000000000000000000',
+      tokenSymbol: chain.nativeCurrency,
+      tokenName: chain.nativeCurrency === 'STT' ? 'Somnia Testnet Token' : 'Somnia',
+      tokenDecimal: '18',
+      balance: balanceInEther.toString(),
+      usdValue: usdValue,
+      chainId: chainId,
+      chainName: chain.name,
+      logoUrl: undefined
+    })
     
     // Add known Somnia ERC20 tokens (excluding native token)
+    // Fetch all tokens in parallel for better performance
     if (chainId === 50312) { // Somnia Testnet
-      // USDT token
-      const usdtBalance = await getERC20Balance(address, '0xda4fde38be7a2b959bf46e032ecfa21e64019b76', chain.rpcUrl, 'USDT', 'Tether USD', 18)
-      if (usdtBalance && parseFloat(usdtBalance.balance) > 0) {
-        balances.push(usdtBalance)
-      }
+      const tokenPromises = [
+        // WSTT (Wrapped Somnia Test Token) - Xontra DEX
+        getERC20Balance(address, '0x25395F913c3e330683C7f6540E5B0bB60790999D', chain.rpcUrl, 'WSTT', 'Wrapped Somnia Test Token', 18, chainId, chain.name),
+        // USDT (Tether USD) - Xontra DEX (9 decimals)
+        getERC20Balance(address, '0xd7BFAfA0573236528e86A37D529938422c2FC631', chain.rpcUrl, 'USDT', 'Tether USD', 9, chainId, chain.name),
+        // XON (Xontra AI) - Xontra DEX (9 decimals)
+        getERC20Balance(address, '0x2be4D53C9DCE1c95c625bf7b5f058F385F56EC09', chain.rpcUrl, 'XON', 'Xontra AI', 9, chainId, chain.name)
+      ]
       
-      // SomniaExchange Token
-      const somniaExchangeBalance = await getERC20Balance(address, '0xf2f773753cebefaf9b68b841d80c083b18c69311', chain.rpcUrl, 'SOMNIAEXCHANGE', 'SomniaExchange Token', 18)
-      if (somniaExchangeBalance && parseFloat(somniaExchangeBalance.balance) > 0) {
-        balances.push(somniaExchangeBalance)
-      }
+      const tokenResults = await Promise.allSettled(tokenPromises)
       
-      // Ping Token
-      const pingBalance = await getERC20Balance(address, '0x33e7fab0a8a5da1a923180989bd617c9c2d1c493', chain.rpcUrl, 'PING', 'Ping Token', 18)
-      if (pingBalance && parseFloat(pingBalance.balance) > 0) {
-        balances.push(pingBalance)
-      }
+      // Add all tokens, even if balance is 0 or if fetch fails (so users can see available tokens)
+      const tokenConfigs = [
+        { address: '0x25395F913c3e330683C7f6540E5B0bB60790999D', symbol: 'WSTT', name: 'Wrapped Somnia Test Token', decimals: 18 },
+        { address: '0xd7BFAfA0573236528e86A37D529938422c2FC631', symbol: 'USDT', name: 'Tether USD', decimals: 9 },
+        { address: '0x2be4D53C9DCE1c95c625bf7b5f058F385F56EC09', symbol: 'XON', name: 'Xontra AI', decimals: 9 }
+      ]
       
-      // Pong Token
-      const pongBalance = await getERC20Balance(address, '0x9beaa0016c22b646ac311ab171270b0ecf23098f', chain.rpcUrl, 'PONG', 'Pong Token', 18)
-      if (pongBalance && parseFloat(pongBalance.balance) > 0) {
-        balances.push(pongBalance)
-      }
+      tokenResults.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value) {
+          balances.push(result.value)
+          console.log(`Added token: ${result.value.tokenSymbol}`)
+        } else {
+          // If fetch failed, still add token with 0 balance so it shows up
+          const config = tokenConfigs[index]
+          console.warn(`Failed to fetch ${config.symbol} balance, adding with 0 balance:`, result.status === 'rejected' ? result.reason : 'Unknown error')
+          
+          let tokenPrice = 0
+          if (config.symbol === 'WSTT') {
+            tokenPrice = 3.65 // STT price
+          } else if (config.symbol === 'USDT') {
+            tokenPrice = 1.0 // USDT price
+          } else if (config.symbol === 'XON') {
+            tokenPrice = 0.01 // XON price placeholder
+          }
+          
+          balances.push({
+            contractAddress: config.address,
+            tokenSymbol: config.symbol,
+            tokenName: config.name,
+            tokenDecimal: config.decimals.toString(),
+            balance: '0',
+            usdValue: 0,
+            chainId: chainId,
+            chainName: chain.name,
+            logoUrl: undefined
+          })
+        }
+      })
     } else if (chainId === 5031) { // Somnia Mainnet
-      // SomniaExchange Token
-      const somniaExchangeBalance = await getERC20Balance(address, '0xf2f773753cebefaf9b68b841d80c083b18c69311', chain.rpcUrl, 'SOMNIAEXCHANGE', 'SomniaExchange Token', 18)
-      if (somniaExchangeBalance && parseFloat(somniaExchangeBalance.balance) > 0) {
-        balances.push(somniaExchangeBalance)
-      }
-      
-      // Ping Token
-      const pingBalance = await getERC20Balance(address, '0x33e7fab0a8a5da1a923180989bd617c9c2d1c493', chain.rpcUrl, 'PING', 'Ping Token', 18)
-      if (pingBalance && parseFloat(pingBalance.balance) > 0) {
-        balances.push(pingBalance)
-      }
-      
-      // Pong Token
-      const pongBalance = await getERC20Balance(address, '0x9beaa0016c22b646ac311ab171270b0ecf23098f', chain.rpcUrl, 'PONG', 'Pong Token', 18)
-      if (pongBalance && parseFloat(pongBalance.balance) > 0) {
-        balances.push(pongBalance)
-      }
+      // Add mainnet tokens here if needed in the future
+      console.log('Somnia Mainnet - ERC20 tokens not configured yet')
     }
     
-    console.log(`Found ${balances.length} token balances`)
+    console.log(`Found ${balances.length} token balances:`, balances.map(t => `${t.tokenSymbol} (${t.balance})`))
     return balances
     
   } catch (error) {
@@ -603,7 +614,9 @@ async function getERC20Balance(
   rpcUrl: string, 
   symbol: string, 
   name: string, 
-  decimals: number
+  decimals: number,
+  chainId: number,
+  chainName: string
 ): Promise<TokenBalance | null> {
   try {
     // Get token balance
@@ -624,31 +637,33 @@ async function getERC20Balance(
     const balanceData = await balanceResponse.json()
     const balance = balanceData.result
     
-    if (balance && balance !== '0x') {
-      const balanceInTokens = parseInt(balance, 16) / Math.pow(10, decimals)
-      
-      // Get token price (simplified - you can implement proper price fetching)
-      let tokenPrice = 0
-      if (symbol === 'WSTT') {
-        tokenPrice = 3.65 // STT price
-      } else if (symbol === 'USDT') {
-        tokenPrice = 1.0 // USDT price
-      }
-      
-      return {
-        contractAddress: tokenAddress,
-        tokenSymbol: symbol,
-        tokenName: name,
-        tokenDecimal: decimals.toString(),
-        balance: balanceInTokens.toString(),
-        usdValue: balanceInTokens * tokenPrice,
-        chainId: 50312, // Will be updated based on actual chain
-        chainName: 'Somnia Testnet',
-        logoUrl: undefined
-      }
+    // Always return token info, even if balance is 0
+    // This ensures users can see available tokens
+    const balanceInTokens = (balance && balance !== '0x') 
+      ? parseInt(balance, 16) / Math.pow(10, decimals)
+      : 0
+    
+    // Get token price (simplified - you can implement proper price fetching)
+    let tokenPrice = 0
+    if (symbol === 'WSTT') {
+      tokenPrice = 3.65 // STT price
+    } else if (symbol === 'USDT') {
+      tokenPrice = 1.0 // USDT price
+    } else if (symbol === 'XON') {
+      tokenPrice = 0.01 // XON price placeholder
     }
     
-    return null
+    return {
+      contractAddress: tokenAddress,
+      tokenSymbol: symbol,
+      tokenName: name,
+      tokenDecimal: decimals.toString(),
+      balance: balanceInTokens.toString(),
+      usdValue: balanceInTokens * tokenPrice,
+      chainId: chainId,
+      chainName: chainName,
+      logoUrl: undefined
+    }
   } catch (error) {
     console.error(`Error fetching ${symbol} balance:`, error)
     return null

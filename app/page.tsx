@@ -2,12 +2,14 @@
 
 import { Navigation } from "@/components/navigation"
 import { WalletDrawer } from "@/components/wallet-drawer"
-import { XontraPromptEngine } from "@/components/xontra-prompt-engine"
-import { NetworkMatrix } from "@/components/network-matrix"
-
 import { Footer } from "@/components/footer"
 import { useState } from "react"
+import Link from "next/link"
 import { SUPPORTED_CHAINS, type ChainConfig } from "@/lib/chains"
+import { Card } from "@/components/ui/card"
+import { PortfolioMatrix } from "@/components/portfolio-matrix"
+import { NetworkMatrix } from "@/components/network-matrix"
+import { RecentActivity } from "@/components/recent-activity"
 
 export default function HomePage() {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false)
@@ -19,19 +21,19 @@ export default function HomePage() {
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
           <defs>
             <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#10b981" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#a855f7" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#9333ea" stopOpacity="0.4" />
             </linearGradient>
             <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.3" />
+              <stop offset="0%" stopColor="#9333ea" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.3" />
             </linearGradient>
             <linearGradient id="wave3" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#9333ea" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
             </linearGradient>
           </defs>
 
@@ -101,14 +103,31 @@ export default function HomePage() {
           onChainChange={setSelectedChain}
         />
 
-        <div className="flex-1 flex gap-6 p-3 sm:p-6">
-          {/* Main Content - Now Centered */}
-          <div className="flex-1 max-w-4xl mx-auto space-y-6 flex flex-col w-full">
-            <div className="flex-1 min-h-[400px] sm:min-h-[500px]">
-              <XontraPromptEngine selectedChain={selectedChain} />
+        <div className="flex-1 flex gap-6 p-3 sm:p-6 mt-16">
+          <div className="flex-1 max-w-5xl mx-auto w-full space-y-6 flex flex-col">
+            {/* Hero */}
+            <Card className="relative bg-gradient-to-r from-purple-700 to-purple-600 border border-purple-600 p-6 sm:p-8 rounded-2xl">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <div className="text-xs sm:text-sm text-slate-300 mb-1">XONTRA AGENT</div>
+                  <h1 className="text-3xl sm:text-4xl font-bold">Your AI DeFi Assistant</h1>
+                  <p className="text-slate-300 mt-2 max-w-2xl">Monitor portfolio, networks, and on-chain activity. Deploy and train agents to automate your DeFi strategies.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link href="/agent-hub" className="px-4 py-2 rounded-lg bg-black hover:bg-black/80 text-white text-sm font-medium">Open Agent Hub</Link>
+                </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+            </Card>
+
+            {/* Main Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <PortfolioMatrix selectedChain={selectedChain} />
               <NetworkMatrix selectedChain={selectedChain} />
+              </div>
+              <div className="space-y-6">
+                <RecentActivity />
+              </div>
             </div>
           </div>
         </div>
