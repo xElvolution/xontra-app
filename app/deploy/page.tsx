@@ -2,7 +2,7 @@
 
 import { Navigation } from "@/components/navigation"
 import { WalletDrawer } from "@/components/wallet-drawer"
-import { XontraPromptEngine } from "@/components/xontra-prompt-engine"
+import { ContractEngine } from "./contract-engine"
 import { Footer } from "@/components/footer"
 import { useState } from "react"
 import { SUPPORTED_CHAINS, type ChainConfig } from "@/lib/chains"
@@ -103,7 +103,7 @@ export default function DeployPage() {
           {/* Main Content - Now Centered */}
           <div className="flex-1 max-w-4xl mx-auto space-y-6 flex flex-col w-full">
             <div className="flex-1 min-h-[400px] sm:min-h-[500px]">
-              <XontraPromptEngine selectedChain={selectedChain} title="XONTRA CONTRACT ENGINE" />
+              <ContractEngine selectedChain={selectedChain} />
             </div>
           </div>
         </div>

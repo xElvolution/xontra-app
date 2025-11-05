@@ -238,16 +238,25 @@ export function Navigation({ onWalletClick, onChainChange }: { onWalletClick: ()
                 {!isSidebarCollapsed && <span>Deploy</span>}
               </Link>
               <Link 
-                href="/agent-hub" 
+                href="/faucet" 
                 className={`flex items-center ${isSidebarCollapsed ? 'justify-center gap-0 px-0 py-2' : 'gap-3 px-3 py-2'} rounded-lg transition-colors ${
-                  pathname === "/agent-hub" 
+                  pathname === "/faucet" 
                     ? "bg-purple-600/20 text-white border border-purple-500/30" 
                     : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                 }`}
               >
-                <Brain className={isSidebarCollapsed ? "w-6 h-6" : "w-5 h-5"} />
-                {!isSidebarCollapsed && <span>Agent Hub</span>}
+                <DollarSign className={isSidebarCollapsed ? "w-6 h-6" : "w-5 h-5"} />
+                {!isSidebarCollapsed && <span>Faucet</span>}
               </Link>
+              <button className={`flex items-center ${isSidebarCollapsed ? 'justify-center gap-0 px-0 py-2' : 'gap-3 px-3 py-2'} rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-800/50 w-full cursor-not-allowed opacity-50`}>
+                <Brain className={isSidebarCollapsed ? "w-6 h-6" : "w-5 h-5"} />
+                {!isSidebarCollapsed && (
+                  <span className="flex items-center gap-2">
+                    Agent Hub
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">Soon</span>
+                  </span>
+                )}
+              </button>
               <button className={`flex items-center ${isSidebarCollapsed ? 'justify-center gap-0 px-0 py-2' : 'gap-3 px-3 py-2'} rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-800/50 w-full`}>
                 <Search className={isSidebarCollapsed ? "w-6 h-6" : "w-5 h-5"} />
                 {!isSidebarCollapsed && (
@@ -330,7 +339,7 @@ export function Navigation({ onWalletClick, onChainChange }: { onWalletClick: ()
               {pathname === "/" && "Dashboard"}
               {pathname === "/swap" && "Swap"}
               {pathname === "/deploy" && "Deploy"}
-              {pathname === "/agent-hub" && "Agent Hub"}
+              {pathname === "/faucet" && "Faucet"}
               {pathname === "/nft" && "NFT Marketplace"}
               {pathname === "/nft/founders" && "Founders NFT"}
               {pathname === "/nft/agents" && "AI Agents"}
@@ -454,14 +463,25 @@ export function Navigation({ onWalletClick, onChainChange }: { onWalletClick: ()
                   </div>
                   Deploy
                 </Link>
-                <Link href="/agent-hub" className="w-full flex items-center gap-3 px-4 py-3 text-left text-white hover:bg-slate-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                  <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg flex items-center justify-center">
+                <Link href="/faucet" className="w-full flex items-center gap-3 px-4 py-3 text-left text-white hover:bg-slate-800/50 rounded-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
+                  <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                   </div>
-                  Agent Hub
+                  Faucet
                 </Link>
+                <button className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-slate-800/50 rounded-lg transition-colors cursor-not-allowed opacity-50" disabled>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <span>Agent Hub</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">Soon</span>
+                </button>
                 
                 {/* NFT Section with Dropdown */}
                 <div className="space-y-1 nft-dropdown">
